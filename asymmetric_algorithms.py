@@ -1,0 +1,113 @@
+import random
+
+def inversement(a,n):
+    return pow(a,1,n)
+
+def est_premier(n):
+    if n < 2:
+        return False
+    
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    
+    return True
+
+def deux_nombres_premiers():
+    premiers = []
+
+    while len(premiers) < 2:
+        x = random.randint(2, 100)
+
+        if est_premier(x):
+            premiers.append(x)
+
+    return premiers[0], premiers[1]
+
+#--------------El GAMAL-------------------------
+def cle_publique(p, g):
+    x = random.randint(1, p-2)
+    h = inversement(g**x, p)
+    return h , x
+
+    
+def elgamal_chiffrement(m):
+    p,g = deux_nombres_premiers()
+    h, _ = cle_publique(p,g)
+    k = random.randint(1, p-2)
+    c1 = inversement(g**k, p)
+    s = pow(h, k, p)
+
+    c2 = (m * s) % p
+    return p, g, c1, c2 
+
+
+def elgamal_dechiffrement(p , g, c1, c2):
+    _ ,x = cle_publique(p,g)
+    s = pow(c1, x, p)
+    s_inverse = pow(s, -1, p)
+
+    m = (c2 * s_inverse) % p
+    return m
+
+# ------ RSA-----
+from math import gcd
+def generate_key():
+    p, q = deux_nombres_premiers()
+    n = p * q
+    phi = (p - 1) * (q - 1)
+    e = random.randint(2, phi - 1)
+    while gcd(e, phi) != 1:
+        e += 1
+    d = pow(e, -1, phi)
+    return (e, n), (d, n)
+
+def encrypt(public_key, m):
+    e, n = public_key
+    return pow(m, e, n)
+
+def decrypt(private_key, cipher):
+    d, n = private_key
+    return pow(cipher, d, n)
+
+#--------------EC El GAMAL-------------------------
+def cle_publique(p, G):
+    k = random.randint(1, p-2)
+    P = k * G
+    return P , k
+
+    
+def ecelgamal_chiffrement(m):
+    p,G = deux_nombres_premiers()
+    P, k = cle_publique(p,G)
+    r = random.randint(1, p-2)
+    c1 = r*G
+    c2 = m + r*P
+    return k, c1, c2 
+
+
+def ecelgamal_dechiffrement(k, c1, c2):
+    M = c2 - k*c1
+    return M
+
+def deffie():
+   
+    p = 23
+    g = 5
+
+ 
+    a = random.randint(1, p-2)
+    b = random.randint(1, p-2)
+
+
+    A = pow(g, a, p)
+    B = pow(g, b, p)
+
+
+    cle_alice = pow(B, a, p)
+    cle_bob = pow(A, b, p)
+
+    if cle_alice == cle_bob:
+        print("Clé secrète commune établie !")
+        print(cle_alice)
+

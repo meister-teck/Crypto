@@ -1,6 +1,3 @@
-# user_manager.py
-# Gestion des utilisateurs avec hachage simple (SHA256 sans sel)
-
 import json
 import os
 from hash_algorithms import sha256
@@ -15,7 +12,6 @@ def verify_password(password, stored_hash):
 
 def load_users():
     if not os.path.exists(USERS_FILE):
-  
         admin_hash = hash_password("admin123")
         admin = {
             "username": "admin",
