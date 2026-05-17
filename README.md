@@ -20,5 +20,5 @@ L’administrateur peut créer, modifier ou supprimer des comptes. Chaque utilis
 
 1. Clonez le dépôt :
    ```bash
-   git clone https://github.com/votre-utilisateur/votre-repo.git
-   cd votre-repo
+   git clone https://github.com/meister-teck/Crypto.git
+   cd Crypto
