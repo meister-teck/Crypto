@@ -77,10 +77,10 @@ def menu_user(username):
             print("Choix invalide.")
 
 def test_hashage():
-    print("\n--- Test des fonctions de hachage maison ---")
+    print("\n--- Test des fonctions de hachage  ---")
     texte = input("Texte à hacher : ")
-    print(f"SHA1 maison   : {sha1(texte)}")
-    print(f"SHA256 maison : {sha256(texte)}")
+    print(f"SHA1    : {sha1(texte)}")
+    print(f"SHA256  : {sha256(texte)}")
     import hashlib
     print(f"SHA1 hashlib   : {hashlib.sha1(texte.encode()).hexdigest()}")
     print(f"SHA256 hashlib : {hashlib.sha256(texte.encode()).hexdigest()}")
@@ -174,7 +174,7 @@ def test_bibliotheques():
 
 def main():
     users = load_users()
-    print("=== Système de gestion de mots de passe (crypto maison) ===")
+    print("=== Système de gestion de mots de passe (crypto) ===")
     while True:
         print("\n--- Connexion ---")
         username = input("Nom d'utilisateur : ")
