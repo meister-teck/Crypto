@@ -200,10 +200,14 @@ def test_asymetrique():
         print(f"Clé publique : {public_key}")
         print(f"Clé privée : {private_key}")
         m = int(input("Message à chiffrer (entier) : "))
-        c = encrypt(public_key, m)
-        print(f"Chiffré : {c}")
-        m_dechiffre = decrypt(private_key, c)
-        print(f"Déchiffré : {m_dechiffre}")
+        e, n = public_key
+        if m >= n:
+            print("Erreur : le message doit être inférieur à n")
+        else:
+            c = encrypt(public_key, m)
+            print(f"Chiffré : {c}")
+            m_dechiffre = decrypt(private_key, c)
+            print(f"Déchiffré : {m_dechiffre}")
     elif choix == "2":
         m = int(input("Message à chiffrer (entier) : "))
         p, G = deux_nombres_premiers()
@@ -214,11 +218,21 @@ def test_asymetrique():
         m_dechiffre = ecelgamal_dechiffrement(k, c1, c2)
         print(f"Déchiffré : {m_dechiffre}")
     elif choix == "3":
-        m = int(input("Message à chiffrer (entier) : "))
-        p, g, c1, c2 = elgamal_chiffrement(m)
-        print(f"Chiffré : (p={p}, g={g}, c1={c1}, c2={c2})")
-        m_dechiffre = elgamal_dechiffrement(p, g, c1, c2)
-        print(f"Déchiffré : {m_dechiffre}")
+        p = int(input("Premier p : "))
+        g = int(input("Générateur g : "))
+        public_key, private_key = generate_keys(p, g)
+
+        print("Clé publique:", public_key)
+        print("Clé privée:", private_key)
+
+        m = int(input("Message : "))
+        if m >= p:
+            print("Erreur : m doit être < p")
+        else:
+            c1, c2 = elgamal_encrypt(public_key, m)
+            print("Chiffré:", c1, c2)
+            m_dec = elgamal_decrypt(private_key, public_key, c1, c2)
+            print("Déchiffré:", m_dec)
     else:
         print("Choix invalide.")
 if __name__ == "__main__":

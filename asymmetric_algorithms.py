@@ -25,29 +25,36 @@ def deux_nombres_premiers():
     return premiers[0], premiers[1]
 
 #--------------El GAMAL-------------------------
-def cle_publique(p, g):
-    x = random.randint(1, p-2)
-    h = inversement(g**x, p)
-    return h , x
+import random
+
+def generate_keys(p, g):
+    x = random.randint(1, p - 2)
+    h = pow(g, x, p)
+    return (p, g, h), x
 
     
-def elgamal_chiffrement(m):
-    p,g = deux_nombres_premiers()
-    h, _ = cle_publique(p,g)
+def elgamal_encrypt(public_key, m):
+    p, g, h = public_key
+
     k = random.randint(1, p-2)
-    c1 = inversement(g**k, p)
+
+    c1 = pow(g, k, p)
     s = pow(h, k, p)
 
     c2 = (m * s) % p
-    return p, g, c1, c2 
+
+    return c1, c2
 
 
-def elgamal_dechiffrement(p , g, c1, c2):
-    _ ,x = cle_publique(p,g)
+def elgamal_decrypt(private_key, public_key, c1, c2):
+    p, g, h = public_key
+    x = private_key
+
     s = pow(c1, x, p)
-    s_inverse = pow(s, -1, p)
+    s_inv = pow(s, -1, p)
 
-    m = (c2 * s_inverse) % p
+    m = (c2 * s_inv) % p
+
     return m
 
 # ------ RSA-----

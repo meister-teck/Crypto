@@ -1,25 +1,10 @@
+from crypto_utils import *
+
 #----------- Fonctions utils ----------
 def bourrage(message, taille):
     if len(message) < taille:
         message = message + [0] * (taille - len(message))
     return message
-
-def xor(bits1, bits2):
-    resultat = []
-    
-    for i in range(len(bits1)):
-        if bits1[i] != bits2[i]:
-            resultat.append(1)
-        else:
-            resultat.append(0)
-    
-    return resultat
-
-def text_to_bytes(text):
-    return [ord(c) for c in text]
-
-def bytes_to_text(msg):
-    return ''.join(chr(i) for i in msg)
 
 # ---------- César ----------
 def chiffrerCesar(texte, n):
@@ -140,7 +125,7 @@ def RC4(key, text):
     text = text_to_bytes(text)
     S = KSA(key)
     key_stream = PRGA(S, len(text))
-    result = xor(text, key_stream)
+    result = xor_bytes(text, key_stream)
     return bytes_to_text(result)
 
 # ---------- DES simplifié ----------
@@ -206,12 +191,12 @@ def sbox_substitution(bits):
 
 def f_function(r, key):
     expanded = permute(r, E)
-    xored = xor(expanded, key)
+    xored = xor_bytes(expanded, key)
     sboxed = sbox_substitution(xored)
     return permute(sboxed, P)
 
 def feistel(l, r, key):
-    return r, xor(l, f_function(r, key))
+    return r, xor_bytes(l, f_function(r, key))
 
 def DES(block, key):
     keys = generate_keys(key)
@@ -230,7 +215,7 @@ def CFB(text, v, key, func, bit_block):
     cipher = b""
     for block in text:
         chiffre_block = func(vecteur, key)
-        cipher_block = xor(block, chiffre_block[:len(block)])
+        cipher_block = xor_bytes(block, chiffre_block[:len(block)])
         cipher += cipher_block
         vecteur = cipher_block  
     return bytes_to_text(cipher)
@@ -242,7 +227,7 @@ def CBC(text, v, key, func, bit_block):
     key = text_to_bytes(key)
     cipher = b""
     for block in text:
-        xored = xor(block, vecteur)
+        xored = xor_bytes(block, vecteur)
         chiffre_block = func(xored, key)
         cipher += chiffre_block
         vecteur = chiffre_block
@@ -256,7 +241,7 @@ def OFB(text, v, key, func, bit_block):
     cipher = b""
     for block in text:
         chiffre_block = func(vecteur, key)
-        cipher_block = xor(block, chiffre_block[:len(block)])
+        cipher_block = xor_bytes(block, chiffre_block[:len(block)])
         cipher += cipher_block
         vecteur = chiffre_block
     return bytes_to_text(cipher)
