@@ -13,10 +13,11 @@ def menu_admin(users, current_user):
         print("2. Modifier un utilisateur")
         print("3. Supprimer un utilisateur")
         print("4. Lister les utilisateurs")
-        print("5. Tester hachage (SHA1, SHA256)")
-        print("6. Tester chiffrement symétrique (César, Vigenère, Vernam, RC4, DES)")
-        print("7. Tester algorithmes asymétriques (RSA, ECC , elGamal)")
+        print("5. Tester hachage ")
+        print("6. Tester chiffrement symétrique ")
+        print("7. Tester algorithmes asymétriques ")
         print("8. Tester bibliothèques Python")
+        print("9. Modifier mon mot de passe")
         print("0. Retour")
         choix = input("Votre choix : ")
 
@@ -26,7 +27,25 @@ def menu_admin(users, current_user):
             role = input("Rôle (admin/user) : ").lower()
             if role not in ("admin", "user"):
                 role = "user"
-            create_user(users, nom, mdp, role)
+            
+            method = "hash"
+            key = None
+            
+            HASH_ALGOS = ["sha256", "sha1"]
+            print("Algorithme de hachage pour le mot de passe :")
+            for i, h_name in enumerate(HASH_ALGOS, 1):
+                print(f"{i}. {h_name.upper()}")
+            alg_choix = input(f"Choix (1-{len(HASH_ALGOS)}) : ")
+            try:
+                idx = int(alg_choix) - 1
+                if 0 <= idx < len(HASH_ALGOS):
+                    algo = HASH_ALGOS[idx]
+                else:
+                    algo = HASH_ALGOS[0]
+            except ValueError:
+                algo = HASH_ALGOS[0]
+                    
+            create_user(users, nom, mdp, role, method, algo, key)
         elif choix == "2":
             nom = input("Nom à modifier : ")
             new_mdp = getpass.getpass("Nouveau mdp (laisser vide) : ")
@@ -48,15 +67,18 @@ def menu_admin(users, current_user):
             test_asymetrique()
         elif choix == "8":
             test_bibliotheques()
+        elif choix == "9":
+            new_mdp = getpass.getpass("Nouveau mot de passe : ")
+            modify_user(users, current_user["username"], new_mdp, None)
         elif choix == "0":
             break
         else:
             print("Choix invalide.")
 
-def menu_user(username):
+def menu_user(users, username):
     while True:
         print("\n===== MENU UTILISATEUR =====")
-        print("1. Tester hachage (SHA1, SHA256)")
+        print("1. Tester hachage ")
         print("2. Tester chiffrement symétrique")
         print("3. Tester algorithmes asymétriques")
         print("4. Tester bibliothèques Python")
@@ -79,74 +101,105 @@ def menu_user(username):
 def test_hashage():
     print("\n--- Test des fonctions de hachage  ---")
     texte = input("Texte à hacher : ")
-    print(f"SHA1    : {sha1(texte)}")
-    print(f"SHA256  : {sha256(texte)}")
+    print("1. SHA1")
+    print("2. SHA256")
+    choix = input("Choisissez un algorithme : ")
+    
     import hashlib
-    print(f"SHA1 hashlib   : {hashlib.sha1(texte.encode()).hexdigest()}")
-    print(f"SHA256 hashlib : {hashlib.sha256(texte.encode()).hexdigest()}")
+    if choix == "1":
+        print(f"SHA1 (Implémentation) : {sha1(texte)}")
+        print(f"SHA1 (hashlib)        : {hashlib.sha1(texte.encode()).hexdigest()}")
+    elif choix == "2":
+        print(f"SHA256 (Implémentation) : {sha256(texte)}")
+        print(f"SHA256 (hashlib)        : {hashlib.sha256(texte.encode()).hexdigest()}")
+    else:
+        print("Choix invalide.")
+
+def run_cesar():
+    texte = input("Mot de passe : ")
+    dec = int(input("Décalage : "))
+    chiffre = chiffrerCesar(texte, dec)
+    print(f"Chiffré : {chiffre}")
+    clair = dechiffrerCesar(chiffre, dec)
+    print(f"Déchiffré : {clair}")
+
+def run_vigenere():
+    texte = input("Mot de passe : ")
+    cle = input("Clé : ")
+    chiffre = chiffrerVigenere(texte, cle)
+    print(f"Chiffré : {chiffre}")
+    clair = dechiffrerVigenere(chiffre, cle)
+    print(f"Déchiffré : {clair}")
+
+def run_vernam():
+    texte = input("Mot de passe : ")
+    cle_auto = input("Clé (laisser vide pour auto) : ")
+    if cle_auto:
+        key = cle_auto
+        chiffre = xor_encrypt(texte, key)
+    else:
+        key, chiffre = chiffrerVernam(texte)
+    print(f"Clé : {key}")
+    print(f"Chiffré : {repr(chiffre)}")
+    clair = DechiffrerVernam(chiffre, key)
+    print(f"Déchiffré : {clair}")
+
+def run_rc4():
+    texte = input("Mot de passe : ")
+    cle = input("Clé RC4 : ")
+    chiffre = RC4(cle, texte)
+    print(f"Chiffré : {repr(chiffre)}")
+    clair = RC4(cle, chiffre)
+    print(f"Déchiffré : {clair}")
+
+def run_des():
+    texte = input("Mot de passe (max 8 caractères) : ")
+    if len(texte) > 8:
+        print("Tronqué à 8 caractères")
+        texte = texte[:8]
+
+    bits = []
+    for c in texte:
+        bits.extend([int(b) for b in format(ord(c), '08b')])
+
+    if len(bits) < 64:
+        bits += [0] * (64 - len(bits))
+
+    key_bits = [random.randint(0,1) for _ in range(64)]
+    print("Clé (bits) :", key_bits[:16], "...")
+    chiffre_bits = DES(bits, key_bits)
+    print("Chiffré (bits, premiers 32) :", chiffre_bits[:32], "...")
+
+    clair_bits = DES(chiffre_bits, key_bits)
+    chars = []
+    for i in range(0, len(clair_bits), 8):
+        byte = clair_bits[i:i+8]
+        if len(byte) == 8:
+            chars.append(chr(int(''.join(str(b) for b in byte), 2)))
+    print(f"Déchiffré : {''.join(chars).rstrip(chr(0))}")
+
+SYM_ALGOS = {
+    "César": run_cesar,
+    "Vigenère": run_vigenere,
+    "Vernam (XOR)": run_vernam,
+    "RC4": run_rc4,
+    "DES (bloc 64 bits, clé 64 bits)": run_des
+}
 
 def test_symetrique():
     print("\n--- Test des algorithmes symétriques ---")
-    print("1. César")
-    print("2. Vigenère")
-    print("3. Vernam (XOR)")
-    print("4. RC4")
-    print("5. DES (bloc 64 bits, clé 64 bits)")
+    noms = list(SYM_ALGOS.keys())
+    for i, name in enumerate(noms, 1):
+        print(f"{i}. {name}")
     choix = input("Choisissez un algorithme : ")
-
-    if choix == "1":
-        texte = input("Texte : ")
-        dec = int(input("Décalage : "))
-        chiffre = chiffrerCesar(texte, dec)
-        print(f"Chiffré : {chiffre}")
-        clair = dechiffrerCesar(chiffre, dec)
-        print(f"Déchiffré : {clair}")
-    elif choix == "2":
-        texte = input("Texte : ")
-        cle = input("Clé : ")
-        chiffre = chiffrerVigenere(texte, cle)
-        print(f"Chiffré : {chiffre}")
-        clair = dechiffrerVigenere(chiffre, cle)
-        print(f"Déchiffré : {clair}")
-    elif choix == "3":
-        texte = input("Texte : ")
-        cle_auto = input("Clé (laisser vide pour auto) : ")
-        if cle_auto:
-            key, chiffre = chiffrerVernam(texte, cle_auto)
+    
+    try:
+        idx = int(choix) - 1
+        if 0 <= idx < len(noms):
+            SYM_ALGOS[noms[idx]]()
         else:
-            key, chiffre = chiffrerVernam(texte)
-        print(f"Clé : {key}")
-        print(f"Chiffré : {repr(chiffre)}")
-        clair = DechiffrerVernam(chiffre, key)
-        print(f"Déchiffré : {clair}")
-    elif choix == "4":
-        texte = input("Texte : ")
-        cle = input("Clé RC4 : ")
-        chiffre = RC4(cle, texte)
-        print(f"Chiffré : {repr(chiffre)}")
-        clair = RC4(cle, chiffre)
-        print(f"Déchiffré : {clair}")
-    elif choix == "5":
-
-        texte = input("Texte (max 8 caractères) : ")
-        if len(texte) > 8:
-            print("Tronqué à 8 caractères")
-            texte = texte[:8]
-
-        bits = []
-        for c in texte:
-            bits.extend([int(b) for b in format(ord(c), '08b')])
-
-        if len(bits) < 64:
-            bits += [0] * (64 - len(bits))
-
-        key_bits = [random.randint(0,1) for _ in range(64)]
-        print("Clé (bits) :", key_bits[:16], "...")
-        chiffre_bits = DES(bits, key_bits)
-        print("Chiffré (bits, premiers 32) :", chiffre_bits[:32], "...")
- 
-        print("(Le déchiffrement DES n'est pas implémenté ici)")
-    else:
+            print("Choix invalide.")
+    except ValueError:
         print("Choix invalide.")
 
 def test_bibliotheques():
@@ -157,18 +210,24 @@ def test_bibliotheques():
         from cryptography.fernet import Fernet
         key = Fernet.generate_key()
         f = Fernet(key)
-        token = f.encrypt(b"test")
-        print(f"  Exemple Fernet : {token}")
+        token = f.encrypt(b"test_mot_de_passe")
+        print(f"  Exemple Fernet (chiffré) : {token}")
+        print(f"  Exemple Fernet (déchiffré) : {f.decrypt(token).decode()}")
     except ImportError:
         print("cryptography non installée (pip install cryptography)")
     try:
         import bcrypt
-        print("bcrypt installée")
+        print("✓ bcrypt installée")
+        mot_de_passe = b"mot_de_passe_secret"
+        hashed = bcrypt.hashpw(mot_de_passe, bcrypt.gensalt())
+        print(f"  Hash bcrypt : {hashed}")
+        print(f"  Vérification : {bcrypt.checkpw(mot_de_passe, hashed)}")
     except ImportError:
         print("bcrypt non installée (pip install bcrypt)")
     try:
         import hashlib
-        print("hashlib")
+        print("✓ hashlib installée")
+        print(f"  SHA256 hashlib : {hashlib.sha256(b'test').hexdigest()}")
     except:
         pass
 
@@ -185,55 +244,66 @@ def main():
             if user["role"] == "admin":
                 menu_admin(users, user)
             else:
-                menu_user(username)
+                menu_user(users, username)
         else:
             print("Échec de l'authentification. Réessayez.")
+def run_rsa():
+    public_key, private_key = generate_key()
+    print(f"Clé publique : {public_key}")
+    print(f"Clé privée : {private_key}")
+    texte = input("Message à chiffrer : ")
+    bytes_msg = texte.encode('utf-8')
+    c_list = [encrypt(public_key, b) for b in bytes_msg]
+    print(f"Chiffré : {c_list}")
+    m_dechiffre = bytes([decrypt(private_key, c) for c in c_list]).decode('utf-8')
+    print(f"Déchiffré : {m_dechiffre}")
+
+def run_ec_elgamal():
+    texte = input("Message à chiffrer : ")
+    p, G = deux_nombres_premiers()
+    P, k = cle_publique(p, G)
+    print(f"Clé publique : P={P}, G={G}")
+    bytes_msg = texte.encode('utf-8')
+    c_list = [ecelgamal_chiffrement(b, p, G, P) for b in bytes_msg]
+    print(f"Chiffré : {c_list}")
+    m_dechiffre = bytes([ecelgamal_dechiffrement(k, c1, c2) for c1, c2 in c_list]).decode('utf-8')
+    print(f"Déchiffré : {m_dechiffre}")
+
+def run_elgamal():
+    p = int(input("Premier p (> 255) : "))
+    g = int(input("Générateur g : "))
+    public_key, private_key = generate_keys(p, g)
+
+    print("Clé publique:", public_key)
+    print("Clé privée:", private_key)
+
+    texte = input("Message : ")
+    bytes_msg = texte.encode('utf-8')
+    c_list = [elgamal_encrypt(public_key, b) for b in bytes_msg]
+    print("Chiffré:", c_list)
+    m_dechiffre = bytes([elgamal_decrypt(private_key, public_key, c1, c2) for c1, c2 in c_list]).decode('utf-8')
+    print("Déchiffré:", m_dechiffre)
+
+ASYM_ALGOS = {
+    "RSA": run_rsa,
+    "EC El GAMAL": run_ec_elgamal,
+    "ElGamal": run_elgamal
+}
+
 def test_asymetrique():
     print("\n--- Test des algorithmes asymétriques ---")
-    print("1. RSA")
-    print("2. EC El GAMAL")
-    print("3. ElGamal")
+    noms = list(ASYM_ALGOS.keys())
+    for i, name in enumerate(noms, 1):
+        print(f"{i}. {name}")
     choix = input("Choisissez un algorithme : ")
 
-    if choix == "1":
-        public_key, private_key = generate_key()
-        print(f"Clé publique : {public_key}")
-        print(f"Clé privée : {private_key}")
-        m = int(input("Message à chiffrer (entier) : "))
-        e, n = public_key
-        if m >= n:
-            print("Erreur : le message doit être inférieur à n")
+    try:
+        idx = int(choix) - 1
+        if 0 <= idx < len(noms):
+            ASYM_ALGOS[noms[idx]]()
         else:
-            c = encrypt(public_key, m)
-            print(f"Chiffré : {c}")
-            m_dechiffre = decrypt(private_key, c)
-            print(f"Déchiffré : {m_dechiffre}")
-    elif choix == "2":
-        m = int(input("Message à chiffrer (entier) : "))
-        p, G = deux_nombres_premiers()
-        P, k = cle_publique(p, G)
-        print(f"Clé publique : P={P}, G={G}")
-        c1, c2 = ecelgamal_chiffrement(m)
-        print(f"Chiffré : c1={c1}, c2={c2}")
-        m_dechiffre = ecelgamal_dechiffrement(k, c1, c2)
-        print(f"Déchiffré : {m_dechiffre}")
-    elif choix == "3":
-        p = int(input("Premier p : "))
-        g = int(input("Générateur g : "))
-        public_key, private_key = generate_keys(p, g)
-
-        print("Clé publique:", public_key)
-        print("Clé privée:", private_key)
-
-        m = int(input("Message : "))
-        if m >= p:
-            print("Erreur : m doit être < p")
-        else:
-            c1, c2 = elgamal_encrypt(public_key, m)
-            print("Chiffré:", c1, c2)
-            m_dec = elgamal_decrypt(private_key, public_key, c1, c2)
-            print("Déchiffré:", m_dec)
-    else:
+            print("Choix invalide.")
+    except ValueError:
         print("Choix invalide.")
 if __name__ == "__main__":
     main()

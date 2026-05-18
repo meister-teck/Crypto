@@ -36,7 +36,8 @@ def chiffrerVigenere(texte, cle):
         char = texte[i]
         if char.isalpha(): 
             decalage = ord(cle[j % len(cle)].upper()) - ord('A')
-            new = chr((ord(char.upper()) - ord('A') + decalage) % 26 + ord('A'))
+            base = ord('A') if char.isupper() else ord('a')
+            new = chr((ord(char) - base + decalage) % 26 + base)
             resultat += new
             j += 1 
         else:
@@ -52,7 +53,8 @@ def dechiffrerVigenere(texte, cle):
         char = texte[i]
         if char.isalpha():  
             decalage = ord(cle[j % len(cle)].upper()) - ord('A')
-            new = chr((ord(char.upper()) - ord('A') - decalage) % 26 + ord('A'))
+            base = ord('A') if char.isupper() else ord('a')
+            new = chr((ord(char) - base - decalage) % 26 + base)
             resultat += new
             j += 1  
         else:
@@ -205,6 +207,19 @@ def DES(block, key):
     for i in range(16):
         L, R = feistel(L, R, keys[i])
     return permute(R + L, IP_INV)
+
+def des_process(password, key):
+    pw = password[:8].ljust(8, ' ')
+    bits = []
+    for c in pw: bits.extend([int(b) for b in format(ord(c), '08b')])
+    kb = []
+    for c in str(key)[:8].ljust(8, ' '): kb.extend([int(b) for b in format(ord(c), '08b')])
+    result_bits = DES(bits, kb)
+    chars = []
+    for i in range(0, len(result_bits), 8):
+        byte = result_bits[i:i+8]
+        if len(byte) == 8: chars.append(chr(int(''.join(str(b) for b in byte), 2)))
+    return ''.join(chars)
 
 # ---------- Modes de chiffrement par bloc (CFB, CBC, OFB) ----------
 def CFB(text, v, key, func, bit_block):

@@ -17,7 +17,7 @@ def deux_nombres_premiers():
     premiers = []
 
     while len(premiers) < 2:
-        x = random.randint(2, 100)
+        x = random.randint(256, 1000)
 
         if est_premier(x):
             premiers.append(x)
@@ -84,13 +84,11 @@ def cle_publique(p, G):
     return P , k
 
     
-def ecelgamal_chiffrement(m):
-    p,G = deux_nombres_premiers()
-    P, k = cle_publique(p,G)
+def ecelgamal_chiffrement(m, p, G, P):
     r = random.randint(1, p-2)
-    c1 = r*G
-    c2 = m + r*P
-    return k, c1, c2 
+    c1 = r * G
+    c2 = m + r * P
+    return c1, c2 
 
 
 def ecelgamal_dechiffrement(k, c1, c2):
@@ -98,18 +96,14 @@ def ecelgamal_dechiffrement(k, c1, c2):
     return M
 
 def deffie():
-   
     p = 23
     g = 5
-
  
     a = random.randint(1, p-2)
     b = random.randint(1, p-2)
 
-
     A = pow(g, a, p)
     B = pow(g, b, p)
-
 
     cle_alice = pow(B, a, p)
     cle_bob = pow(A, b, p)
