@@ -9,7 +9,7 @@ L’administrateur peut créer, modifier ou supprimer des comptes. Chaque utilis
 
 - **Gestion des utilisateurs** (CRUD) avec rôles (admin / user)
 - **Chiffrement symétrique** :  
-  - César, Vigenère, Vernam (XOR), RC4, DES (Feistel, S-Box)
+  - César, Vigenère, Vernam (XOR), RC4, DES
 - **Chiffrement asymétrique** :
   - RSA , ElGamal
 - **Modes de chiffrement** : CFB, CBC, OFB (pour les blocs)
