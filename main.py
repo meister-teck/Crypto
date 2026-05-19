@@ -270,7 +270,7 @@ def run_ec_elgamal():
     print(f"Déchiffré : {m_dechiffre}")
 
 def run_elgamal():
-    p = int(input("Premier p (> 255) : "))
+    p = int(input("Premier p (p > 255, i.e 767) : "))
     g = int(input("Générateur g : "))
     public_key, private_key = generate_keys(p, g)
 
