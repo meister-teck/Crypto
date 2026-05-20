@@ -147,9 +147,9 @@ def run_vernam():
 def run_rc4():
     texte = input("Mot de passe : ")
     cle = input("Clé RC4 : ")
-    chiffre = RC4(cle, texte)
+    chiffre = RC4(texte, cle)
     print(f"Chiffré : {repr(chiffre)}")
-    clair = RC4(cle, chiffre)
+    clair = RC4(chiffre, cle)
     print(f"Déchiffré : {clair}")
 
 def run_des():
