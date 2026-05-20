@@ -12,9 +12,9 @@ HASH_METHODS = {
 
 ENCRYPT_METHODS = {
     "cesar": lambda p, k: chiffrerCesar(p, int(k)),
-    "vigenere": chiffrerVigenere,
-    "vernam": xor_encrypt,
-    "rc4": lambda p, k: RC4(k, p),
+    "vigenere": lambda p, k: chiffrerVigenere(p, k),
+    "vernam": lambda p, k: xor_encrypt(p, k),
+    "rc4": lambda p, k: RC4(p, k),
     "des": des_process
 }
 
