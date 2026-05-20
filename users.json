@@ -12,5 +12,12 @@
         "role": "user",
         "storage_method": "hash",
         "algorithm": "sha256"
+    },
+    "amine": {
+        "username": "amine",
+        "password_hash": "d6b4de6999e7d6398d6c8e40c6992ffb0a184ad0",
+        "role": "user",
+        "storage_method": "hash",
+        "algorithm": "sha1"
     }
 }

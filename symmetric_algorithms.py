@@ -66,8 +66,12 @@ def dechiffrerVigenere(texte, cle):
 import random
 import string
 
+
+import string
+import random
+
 def xor_encrypt(text, key):
-    result = ''
+    result = ""
     for i in range(len(text)):
         ascii_text = ord(text[i])
         ascii_key = ord(key[i])
@@ -88,15 +92,7 @@ def chiffrerVernam(text):
     return key, cryptage
 
 def DechiffrerVernam(cryptage, key):
-    n = len(cryptage)
-    if n != len(key) :
-        if n % len(key) == 0:
-            key = key * ( n // len(key) )
-        else:
-            return "La clé doit avoir la même longueur que le texte, ou bien la longueur du texte doit être un multiple de celle de la clé."
-    original = xor_encrypt(cryptage, key) 
-    return original
-
+    return xor_encrypt(cryptage, key)
 # ---------- RC4 ----------
 def KSA(key_byte):
     S = [i for i in range(256)]
@@ -130,7 +126,7 @@ def RC4(text, key):
     result = xor_bytes(text, key_stream)
     return bytes_to_text(result)
 
-# ---------- DES simplifié ----------
+# ---------- DES ----------
 IP = [58, 50, 42, 34, 26, 18, 10, 2,
       60, 52, 44, 36, 28, 20, 12, 4,
       62, 54, 46, 38, 30, 22, 14, 6,
@@ -209,17 +205,73 @@ def DES(block, key):
     return permute(R + L, IP_INV)
 
 def des_process(password, key):
-    pw = password[:8].ljust(8, ' ')
-    bits = []
-    for c in pw: bits.extend([int(b) for b in format(ord(c), '08b')])
     kb = []
-    for c in str(key)[:8].ljust(8, ' '): kb.extend([int(b) for b in format(ord(c), '08b')])
-    result_bits = DES(bits, kb)
-    chars = []
-    for i in range(0, len(result_bits), 8):
-        byte = result_bits[i:i+8]
-        if len(byte) == 8: chars.append(chr(int(''.join(str(b) for b in byte), 2)))
-    return ''.join(chars)
+    for c in str(key)[:8].ljust(8, ' '): 
+        kb.extend([int(b) for b in format(ord(c), '08b')])
+    
+    if not password:
+        password = " "
+    chunks = [password[i:i+8] for i in range(0, len(password), 8)]
+    
+    final_result = ""
+    
+    for chunk in chunks:
+        # On complète le bloc avec des espaces s'il fait moins de 8 caractères (Padding)
+        padded_chunk = chunk.ljust(8, ' ')
+        
+        # Conversion du bloc en bits
+        bits = []
+        for c in padded_chunk: 
+            bits.extend([int(b) for b in format(ord(c), '08b')])
+        
+        result_bits = DES(bits, kb)
+        
+        # Conversion des bits chiffrés en caractères
+        chars = []
+        for i in range(0, len(result_bits), 8):
+            byte = result_bits[i:i+8]
+            if len(byte) == 8: 
+                chars.append(chr(int(''.join(str(b) for b in byte), 2)))
+                
+        final_result += ''.join(chars)
+        
+    return final_result
+
+def DES_decrypt(block, key):
+    keys = generate_keys(key)
+    keys.reverse() # On inverse les clés pour le déchiffrement
+    block = permute(block, IP)
+    L, R = split(block)
+    for i in range(16):
+        L, R = feistel(L, R, keys[i])
+    return permute(R + L, IP_INV)
+
+def des_decrypt_process(ciphertext, key):
+    kb = []
+    for c in str(key)[:8].ljust(8, ' '): 
+        kb.extend([int(b) for b in format(ord(c), '08b')])
+    
+    chunks = [ciphertext[i:i+8] for i in range(0, len(ciphertext), 8)]
+    final_result = ""
+    
+    for chunk in chunks:
+        padded_chunk = chunk.ljust(8, ' ')
+        bits = []
+        for c in padded_chunk: 
+            bits.extend([int(b) for b in format(ord(c), '08b')])
+        
+        result_bits = DES_decrypt(bits, kb) # Appel à DES_decrypt
+        
+        chars = []
+        for i in range(0, len(result_bits), 8):
+            byte = result_bits[i:i+8]
+            if len(byte) == 8: 
+                chars.append(chr(int(''.join(str(b) for b in byte), 2)))
+                
+        final_result += ''.join(chars)
+        
+    return final_result
+
 
 # ---------- Modes de chiffrement par bloc (CFB, CBC, OFB) ----------
 def CFB(text, v, key, func, bit_block):

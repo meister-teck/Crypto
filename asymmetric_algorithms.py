@@ -26,35 +26,30 @@ def deux_nombres_premiers():
 
 #--------------El GAMAL-------------------------
 import random
-
 def generate_keys(p, g):
     x = random.randint(1, p - 2)
     h = pow(g, x, p)
     return (p, g, h), x
-
     
 def elgamal_encrypt(public_key, m):
     p, g, h = public_key
-
     k = random.randint(1, p-2)
-
+    
     c1 = pow(g, k, p)
     s = pow(h, k, p)
-
     c2 = (m * s) % p
-
+    
     return c1, c2
-
 
 def elgamal_decrypt(private_key, public_key, c1, c2):
     p, g, h = public_key
     x = private_key
-
+    
     s = pow(c1, x, p)
+    # pow(s, -1, p) calcule l'inverse modulaire (nécessite Python 3.8+)
     s_inv = pow(s, -1, p)
-
     m = (c2 * s_inv) % p
-
+    
     return m
 
 # ------ RSA-----
