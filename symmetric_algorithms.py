@@ -122,7 +122,7 @@ def PRGA(S, textlength):
         key.append(K)
     return key
 
-def RC4(key, text):
+def RC4(text, key):
     key = text_to_bytes(key)
     text = text_to_bytes(text)
     S = KSA(key)
