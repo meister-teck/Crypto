@@ -216,18 +216,18 @@ def test_symetrique():
             print(f"{i}. {name}")
         print("0. Retour")
         
-        choix = input("Choisissez un algorithme : ")
+        choix = input("Choisissez un algorithme : ").strip()
         
         if choix == "0":
             break
 
-        try:
+        if choix.isdigit():
             idx = int(choix) - 1
             if 0 <= idx < len(noms):
                 SYM_ALGOS[noms[idx]]()
             else:
-                print("Choix invalide.")
-        except ValueError:
+                print("Choix invalide else.")
+        else :
             print("Choix invalide.")
 
 def test_bibliotheques():
