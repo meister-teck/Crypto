@@ -299,7 +299,7 @@ def run_ec_elgamal():
 
 def run_elgamal():
     print("\n--- Algorithme ElGamal ---")
-    p = int(input("Premier p (p > 255, par ex 767) : "))
+    p = int(input("Premier p (p > 255, par ex 307) : "))
     g = int(input("Générateur g : "))
     
    
