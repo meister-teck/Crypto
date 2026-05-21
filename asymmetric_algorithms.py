@@ -1,4 +1,5 @@
 import random
+from math import gcd
 
 def inversement(a,n):
     return pow(a,1,n)
@@ -25,7 +26,6 @@ def deux_nombres_premiers():
     return premiers[0], premiers[1]
 
 #--------------El GAMAL-------------------------
-import random
 def generate_keys(p, g):
     x = random.randint(1, p - 2)
     h = pow(g, x, p)
@@ -53,7 +53,6 @@ def elgamal_decrypt(private_key, public_key, c1, c2):
     return m
 
 # ------ RSA-----
-from math import gcd
 def generate_key():
     p, q = deux_nombres_premiers()
     n = p * q
