@@ -1,4 +1,7 @@
 from crypto_utils import *
+import random
+import string
+
 
 #----------- Fonctions utils ----------
 def bourrage(message, taille):
@@ -63,14 +66,9 @@ def dechiffrerVigenere(texte, cle):
     return resultat
 
 # ---------- Vernam (XOR)  ----------
-import random
-import string
-
-
-import string
-import random
-
 def xor_encrypt(text, key):
+    if len(text) != len(key) :
+        raise ValueError("text and key need to be the same length")
     result = ""
     for i in range(len(text)):
         ascii_text = ord(text[i])
@@ -93,6 +91,7 @@ def chiffrerVernam(text):
 
 def DechiffrerVernam(cryptage, key):
     return xor_encrypt(cryptage, key)
+
 # ---------- RC4 ----------
 def KSA(key_byte):
     S = [i for i in range(256)]
