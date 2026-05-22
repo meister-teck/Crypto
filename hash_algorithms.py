@@ -143,3 +143,49 @@ def inverse_modulaire(a, m):
     if r0 != 1:
         return None
     return x0 % m
+
+def sha1_file(filepath):
+    """Hash a file using SHA1 (reads in chunks to handle large files)."""
+    H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
+    
+    with open(filepath, 'rb') as f:
+        # Read entire file as bytes
+        data = f.read()
+    
+    # Convert to bytearray for padding
+    message = bytearray(data)
+    original_length = len(message) * 8
+    message.append(0x80)
+    while (len(message) * 8) % 512 != 448:
+        message.append(0)
+    message += original_length.to_bytes(8, 'big')
+    
+    blocks = split_blocks(message)
+    for block in blocks:
+        H = compression_sha1(block, H)
+    
+    return ''.join(f"{h:08x}" for h in H)
+
+
+def sha256_file(filepath):
+    """Hash a file using SHA256 (reads in chunks to handle large files)."""
+    H = [
+        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+    ]
+    
+    with open(filepath, 'rb') as f:
+        data = f.read()
+    
+    message = bytearray(data)
+    original_length = len(message) * 8
+    message.append(0x80)
+    while (len(message) * 8) % 512 != 448:
+        message.append(0)
+    message += original_length.to_bytes(8, 'big')
+    
+    blocks = split_blocks(message)
+    for block in blocks:
+        H = compression_sha256(block, H)
+    
+    return ''.join(f"{h:08x}" for h in H)
