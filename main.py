@@ -118,27 +118,57 @@ def menu_user(users, username):
             print("Choix invalide.")
 
 def test_hashage():
-    import hashlib 
+    import hashlib
+    import os
     while True:
-        print("\n--- Test des fonctions de hachage  ---")
-        print("1. SHA1")
-        print("2. SHA256")
+        print("\n--- Test des fonctions de hachage ---")
+        print("1. SHA1 (texte)")
+        print("2. SHA256 (texte)")
+        print("3. SHA1 (fichier)")
+        print("4. SHA256 (fichier)")
         print("0. Retour")
-        
+
         choix = input("Choisissez un algorithme : ")
-        
+
         if choix == "0":
             break
-            
+
         if choix in ("1", "2"):
-            texte = input("Texte à hacher : ") 
-            
+            texte = input("Texte à hacher : ")
+
             if choix == "1":
                 print(f"SHA1 (Implémentation) : {sha1(texte)}")
-                print(f"SHA1 (hashlib)        : {hashlib.sha1(texte.encode()).hexdigest()}")
+                print(f"SHA1 (hashlib) : {hashlib.sha1(texte.encode()).hexdigest()}")
             elif choix == "2":
                 print(f"SHA256 (Implémentation) : {sha256(texte)}")
-                print(f"SHA256 (hashlib)        : {hashlib.sha256(texte.encode()).hexdigest()}")
+                print(f"SHA256 (hashlib) : {hashlib.sha256(texte.encode()).hexdigest()}")
+
+        elif choix in ("3", "4"):
+            filepath = input("Chemin du fichier à hacher : ").strip().strip('"')
+            
+            if not os.path.exists(filepath):
+                print("Erreur : Le fichier n'existe pas.")
+                continue
+            
+            if choix == "3":
+                try:
+                    result = sha1_file(filepath)
+                    print(f"SHA1 (Implémentation fichier) : {result}")
+                    # Verification avec hashlib
+                    with open(filepath, 'rb') as f:
+                        print(f"SHA1 (hashlib fichier) : {hashlib.sha1(f.read()).hexdigest()}")
+                except Exception as e:
+                    print(f"Erreur lors du hachage : {e}")
+            
+            elif choix == "4":
+                try:
+                    result = sha256_file(filepath)
+                    print(f"SHA256 (Implémentation fichier) : {result}")
+                    # Verification avec hashlib
+                    with open(filepath, 'rb') as f:
+                        print(f"SHA256 (hashlib fichier) : {hashlib.sha256(f.read()).hexdigest()}")
+                except Exception as e:
+                    print(f"Erreur lors du hachage : {e}")
         else:
             print("Choix invalide.")
 
