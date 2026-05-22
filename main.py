@@ -185,6 +185,7 @@ def run_vigenere():
     cle = input("Clé : ")
     chiffre = chiffrerVigenere(texte, cle)
     print(f"Chiffré : {chiffre}")
+    print(f"Chiffré (hex) : {chiffre.encode('latin-1').hex()}")
     clair = dechiffrerVigenere(chiffre, cle)
     print(f"Déchiffré : {clair}")
 
@@ -204,7 +205,8 @@ def run_vernam():
         
     print(f"Clé : {key}")
     print(f"Chiffré : {repr(chiffre)}")
-    
+    print(f"Chiffré (hex) : {chiffre.encode('latin-1').hex()}")
+
     clair = DechiffrerVernam(chiffre, key)
     print(f"Déchiffré : {clair}")
 
@@ -213,6 +215,8 @@ def run_rc4():
     cle = input("Clé RC4 : ")
     chiffre = RC4(texte, cle)
     print(f"Chiffré : {repr(chiffre)}")
+    print(f"Chiffré (hex) : {chiffre.encode('latin-1').hex()}")
+    
     clair = RC4(chiffre, cle)
     print(f"Déchiffré : {clair}")
 
@@ -226,7 +230,8 @@ def run_des():
 
     chiffre = des_process(texte, cle)
     print(f"\nChiffré (brut) : {repr(chiffre)}")
-
+    print(f"Chiffré (hex) : {chiffre.encode('latin-1').hex()}")
+    
     clair = des_decrypt_process(chiffre, cle).rstrip()
     print(f"Déchiffré      : {clair}")
 
